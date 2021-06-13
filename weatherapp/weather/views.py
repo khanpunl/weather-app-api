@@ -16,6 +16,9 @@ class WeatherAPIView(generics.CreateAPIView):
         city = self.request.GET.get('city', '')
         country = self.request.GET.get('country', '')
 
+        city = city.replace('$', '')
+        country = country.replace('$', '')
+
         url = f'http://api.openweathermap.org/data/2.5/weather?q={city},{country}&appid={settings.API_KEY}'
 
         location_data = requests.get(url).json()
@@ -36,13 +39,9 @@ class WeatherAPIView(generics.CreateAPIView):
         Returns:
             A dictionary of data that will be returned by the API
         """
-        DEGREE_SIGN = u'\N{DEGREE SIGN}'
 
         location_name = f"{data['name']}, {data['sys']['country']}"
-        # temperature = round(data['main']['temp'] - 273.15) + " " + DEGREE_SIGN + " C" 
-        # temperature = f"{round(data['main']['temp'] - 273.15)} {DEGREE_SIGN}C"
         temperature = f"{round(data['main']['temp'] - 273.15)} °C"
-        # temperature = f"{round(data['main']['temp'] - 273.15)} C"
         wind = self.windType(data['wind']['speed']) \
                + ', ' \
                + str(data['wind']['speed']) \
@@ -58,7 +57,6 @@ class WeatherAPIView(generics.CreateAPIView):
                             round(data['coord']['lon'], 2),
                             ]
         requested_time = str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        # requested_time = str(datetime.datetime.fromtimestamp(data['dt']).strftime('%Y-%m-%d %H:%M:%S'))
         forecast = data['weather'][0]
 
         resp = {
